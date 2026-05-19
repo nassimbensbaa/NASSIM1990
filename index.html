@@ -3,75 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر VIP | اطلب الآن</title>
+    <title>متجر VIP | ساعة ذكية برو MAX</title>
 
+    <!-- Fonts & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        @keyframes float {
-            0%,100% {transform:translateY(0)}
-            50% {transform:translateY(-10px)}
+        * {
+            font-family: 'Cairo', sans-serif;
         }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%,100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes pulse {
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
         .title-float {
             animation: float 3s ease-in-out infinite;
-            background: linear-gradient(135deg,#f59e0b,#ef4444);
-            -webkit-background-clip:text;
-            color:transparent;
+            background: linear-gradient(135deg, #f59e0b, #ef4444, #f59e0b);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: float 3s ease-in-out infinite, shimmer 3s ease infinite;
         }
+
         .btn-glow {
-            transition:.3s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
+
+        .btn-glow:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-glow:hover:before {
+            width: 300px;
+            height: 300px;
+        }
+
         .btn-glow:hover {
-            transform: translateY(-2px);
-            box-shadow:0 10px 20px rgba(0,0,0,.2);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
         }
-        input,select {
-            border:2px solid #e5e7eb;
-            transition:.2s;
+
+        input, select {
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            background: white;
         }
-        input:focus,select:focus {
-            border-color:#f59e0b;
+
+        input:focus, select:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
             outline: none;
+            transform: scale(1.01);
         }
+
         .loading {
-            width:18px;
-            height:18px;
-            border:3px solid #eee;
-            border-top:3px solid #f59e0b;
-            border-radius:50%;
-            animation:spin .8s linear infinite;
-            display:inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #f59e0b;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
         }
+
         @keyframes spin {
-            to {transform:rotate(360deg)}
+            to { transform: rotate(360deg); }
         }
-        .error-message {
-            color: #ef4444;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
+
+        .card-animate {
+            animation: fadeInUp 0.6s ease-out;
         }
-        .success-message {
-            color: #10b981;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
+
+        .price-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .discount-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            max-width: 400px;
+            width: 90%;
+            animation: slideIn 0.3s ease;
+        }
+
+        .timer {
+            background: linear-gradient(135deg, #1f2937, #111827);
+            border-radius: 15px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .timer-number {
+            background: #374151;
+            border-radius: 10px;
+            padding: 10px;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        input.error {
+            border-color: #ef4444;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            border-radius: 10px;
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
 
 <div id="root"></div>
+<div id="successModal" class="modal">
+    <div class="modal-content p-6 text-center">
+        <i class="fas fa-check-circle text-green-500 text-6xl mb-4"></i>
+        <h3 class="text-2xl font-bold mb-2">تم استلام طلبك!</h3>
+        <p class="text-gray-600 mb-4">سنقوم بالتواصل معك خلال 24 ساعة</p>
+        <button onclick="closeModal()" class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition">حسناً</button>
+    </div>
+</div>
 
 <script>
 // ================= المنتج =================
 const PRODUCT = {
-    name: "🔥 ساعة ذكية برو MAX",
+    name: "⌚ ساعة ذكية برو MAX",
     price: 12990,
     discount: 28,
-    image: "images/nassim.png"
+    image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&h=500&fit=crop",
+    features: [
+        { icon: "fas fa-heartbeat", text: "قياس معدل ضربات القلب" },
+        { icon: "fas fa-chart-line", text: "تتبع النشاط الرياضي" },
+        { icon: "fas fa-mobile-alt", text: "اتصال بالهاتف" },
+        { icon: "fas fa-water", text: "مقاومة للماء IP68" }
+    ]
 };
 
 const finalPrice = PRODUCT.price * (1 - PRODUCT.discount / 100);
+let countdownTimer;
 
 // ================= الحالة =================
 let formData = {
@@ -82,7 +251,7 @@ let formData = {
     delivery: "office",
     loading: false,
     message: "",
-    messageType: "" // success, error
+    messageType: ""
 };
 
 // ================= سعر التوصيل =================
@@ -90,56 +259,214 @@ function shippingPrice(type){
     return type === "home" ? 700 : 400;
 }
 
+// ================= عداد التوقيت =================
+function startCountdown() {
+    let timeLeft = 3600; // 60 دقيقة
+    const timerElement = document.getElementById("timer");
+    if (!timerElement) return;
+
+    const interval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            if(timerElement) timerElement.innerHTML = "انتهى العرض!";
+            return;
+        }
+        
+        const hours = Math.floor(timeLeft / 3600);
+        const minutes = Math.floor((timeLeft % 3600) / 60);
+        const seconds = timeLeft % 60;
+        
+        if(timerElement) {
+            timerElement.innerHTML = `
+                <div class="flex justify-center gap-3 text-center">
+                    <div class="timer-number">
+                        <div class="text-2xl font-bold text-white">${String(hours).padStart(2, '0')}</div>
+                        <div class="text-xs text-gray-400">ساعات</div>
+                    </div>
+                    <div class="text-2xl font-bold text-white">:</div>
+                    <div class="timer-number">
+                        <div class="text-2xl font-bold text-white">${String(minutes).padStart(2, '0')}</div>
+                        <div class="text-xs text-gray-400">دقائق</div>
+                    </div>
+                    <div class="text-2xl font-bold text-white">:</div>
+                    <div class="timer-number">
+                        <div class="text-2xl font-bold text-white">${String(seconds).padStart(2, '0')}</div>
+                        <div class="text-xs text-gray-400">ثواني</div>
+                    </div>
+                </div>
+            `;
+        }
+        timeLeft--;
+    }, 1000);
+}
+
 // ================= عرض الصفحة =================
 function render(){
     const shipping = shippingPrice(formData.delivery);
     const total = finalPrice + shipping;
+    const savedAmount = PRODUCT.price - finalPrice;
 
     const messageClass = formData.messageType === "success" ? "text-green-600" : "text-red-600";
 
     document.getElementById("root").innerHTML = `
-        <div class="max-w-4xl mx-auto p-4">
-            <div class="bg-white rounded-3xl shadow-xl p-6">
-                <h1 class="text-3xl font-bold text-center title-float">
-                    ${PRODUCT.name}
-                </h1>
-                <img src="${PRODUCT.image}" class="w-full rounded-xl mt-4" onerror="this.src='https://via.placeholder.com/400x300?text=Product+Image'">
-                <div class="text-center mt-4">
-                    <span class="text-3xl font-bold">${Math.round(finalPrice)} دج</span>
+        <div class="max-w-5xl mx-auto p-4 py-8">
+            <div class="card-animate">
+                <!-- شريط المبيعات -->
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 mb-6 text-center text-white">
+                    <i class="fas fa-fire text-orange-500"></i>
+                    <span class="font-bold">${Math.floor(Math.random() * 50) + 20}</span> شخص اشتروا هذا المنتج اليوم
                 </div>
-                <input id="firstName" placeholder="الاسم" value="${escapeHtml(formData.firstName)}" class="w-full p-3 mt-4 rounded-xl">
-                <input id="lastName" placeholder="اللقب" value="${escapeHtml(formData.lastName)}" class="w-full p-3 mt-2 rounded-xl">
-                <input id="phone" placeholder="رقم الهاتف" value="${escapeHtml(formData.phone)}" class="w-full p-3 mt-2 rounded-xl">
-                <select id="state" class="w-full p-3 mt-2 rounded-xl">
-                    <option value="">اختر الولاية</option>
-                    <option ${formData.state === "الجزائر" ? "selected" : ""}>الجزائر</option>
-                    <option ${formData.state === "وهران" ? "selected" : ""}>وهران</option>
-                    <option ${formData.state === "باتنة" ? "selected" : ""}>باتنة</option>
-                    <option ${formData.state === "سطيف" ? "selected" : ""}>سطيف</option>
-                    <option ${formData.state === "قسنطينة" ? "selected" : ""}>قسنطينة</option>
-                </select>
-                <select id="delivery" class="w-full p-3 mt-2 rounded-xl">
-                    <option value="office" ${formData.delivery === "office" ? "selected" : ""}>توصيل للمكتب (${Math.round(shippingPrice("office"))} دج)</option>
-                    <option value="home" ${formData.delivery === "home" ? "selected" : ""}>توصيل للمنزل (${Math.round(shippingPrice("home"))} دج)</option>
-                </select>
-                <div class="bg-gray-800 text-white p-4 mt-4 rounded-xl text-center">
-                    💰 المجموع: ${Math.round(total)} دج
+
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <!-- قسم الصورة -->
+                    <div class="relative">
+                        <div class="bg-white rounded-3xl shadow-2xl p-6 relative overflow-hidden group">
+                            <div class="discount-badge absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold z-10">
+                                -${PRODUCT.discount}% خصم
+                            </div>
+                            <img src="${PRODUCT.image}" class="w-full rounded-2xl transition-transform duration-500 group-hover:scale-105" 
+                                 onerror="this.src='https://via.placeholder.com/500x500?text=Smart+Watch'">
+                        </div>
+                        
+                        <!-- الميزات -->
+                        <div class="grid grid-cols-2 gap-3 mt-4">
+                            ${PRODUCT.features.map(feature => `
+                                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center text-white feature-card transition">
+                                    <i class="${feature.icon} text-2xl text-orange-500 mb-1"></i>
+                                    <p class="text-sm">${feature.text}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- قسم المعلومات -->
+                    <div class="bg-white rounded-3xl shadow-2xl p-6">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-crown text-yellow-500 text-3xl mb-2"></i>
+                            <h1 class="text-3xl font-bold title-float">
+                                ${PRODUCT.name}
+                            </h1>
+                        </div>
+
+                        <!-- السعر -->
+                        <div class="text-center mb-4">
+                            <span class="text-4xl font-bold text-orange-600">${Math.round(finalPrice)} دج</span>
+                            <span class="text-gray-400 line-through mr-2">${PRODUCT.price} دج</span>
+                            <div class="text-sm text-green-600 mt-1">
+                                <i class="fas fa-gift"></i> وفرت ${Math.round(savedAmount)} دج
+                            </div>
+                        </div>
+
+                        <!-- عداد التوقيت -->
+                        <div class="timer" id="timer"></div>
+
+                        <!-- نموذج الطلب -->
+                        <div class="space-y-3 mt-4">
+                            <input id="firstName" placeholder="الاسم *" value="${escapeHtml(formData.firstName)}" class="w-full p-3 rounded-xl">
+                            <input id="lastName" placeholder="اللقب *" value="${escapeHtml(formData.lastName)}" class="w-full p-3 rounded-xl">
+                            <input id="phone" placeholder="رقم الهاتف *" value="${escapeHtml(formData.phone)}" class="w-full p-3 rounded-xl" dir="ltr">
+                            
+                            <select id="state" class="w-full p-3 rounded-xl">
+                                <option value="">اختر الولاية *</option>
+                                <option ${formData.state === "الجزائر" ? "selected" : ""}>الجزائر</option>
+                                <option ${formData.state === "وهران" ? "selected" : ""}>وهران</option>
+                                <option ${formData.state === "باتنة" ? "selected" : ""}>باتنة</option>
+                                <option ${formData.state === "سطيف" ? "selected" : ""}>سطيف</option>
+                                <option ${formData.state === "قسنطينة" ? "selected" : ""}>قسنطينة</option>
+                                <option ${formData.state === "عنابة" ? "selected" : ""}>عنابة</option>
+                                <option ${formData.state === "بليدة" ? "selected" : ""}>بليدة</option>
+                            </select>
+                            
+                            <select id="delivery" class="w-full p-3 rounded-xl">
+                                <option value="office" ${formData.delivery === "office" ? "selected" : ""}>📦 توصيل للمكتب (${Math.round(shippingPrice("office"))} دج)</option>
+                                <option value="home" ${formData.delivery === "home" ? "selected" : ""}>🏠 توصيل للمنزل (${Math.round(shippingPrice("home"))} دج)</option>
+                            </select>
+                        </div>
+
+                        <!-- تفاصيل السعر -->
+                        <div class="bg-gray-50 rounded-xl p-4 mt-4 space-y-2">
+                            <div class="flex justify-between">
+                                <span>سعر المنتج:</span>
+                                <span class="font-bold">${Math.round(finalPrice)} دج</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>رسوم التوصيل:</span>
+                                <span class="font-bold">${Math.round(shipping)} دج</span>
+                            </div>
+                            <div class="border-t pt-2 flex justify-between text-lg font-bold">
+                                <span>المجموع:</span>
+                                <span class="text-orange-600">${Math.round(total)} دج</span>
+                            </div>
+                        </div>
+
+                        <!-- زر الطلب -->
+                        <button id="btn" class="w-full mt-4 bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 rounded-xl btn-glow font-bold text-lg relative overflow-hidden">
+                            ${formData.loading ? `<span class="loading"></span> جاري الإرسال...` : '🛒 تأكيد الطلب الآن'}
+                        </button>
+
+                        <!-- ضمانات -->
+                        <div class="flex justify-around mt-6 text-center text-sm text-gray-500">
+                            <div><i class="fas fa-truck text-green-600"></i> <span>توصيل سريع</span></div>
+                            <div><i class="fas fa-credit-card text-blue-600"></i> <span>الدفع عند الاستلام</span></div>
+                            <div><i class="fas fa-shield-alt text-purple-600"></i> <span>ضمان 12 شهر</span></div>
+                        </div>
+
+                        <p class="text-center mt-3 ${messageClass} text-sm">${formData.message}</p>
+                    </div>
                 </div>
-                <button id="btn" class="w-full mt-4 bg-green-600 text-white p-3 rounded-xl btn-glow font-bold text-lg">
-                    ${formData.loading ? `<span class="loading"></span> جاري الإرسال...` : "تأكيد الطلب"}
-                </button>
-                <p class="text-center mt-3 ${messageClass}">${formData.message}</p>
+
+                <!-- قسم الشهادات -->
+                <div class="mt-8 grid md:grid-cols-3 gap-4">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center text-white">
+                        <i class="fas fa-star text-yellow-400 text-2xl mb-2"></i>
+                        <p class="text-sm">"ساعة رائعة جداً أنصح بها"</p>
+                        <p class="text-xs text-gray-300 mt-2">- أحمد محمد</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center text-white">
+                        <i class="fas fa-star text-yellow-400 text-2xl mb-2"></i>
+                        <p class="text-sm">"خدمة ممتازة وجودة عالية"</p>
+                        <p class="text-xs text-gray-300 mt-2">- سارة علي</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center text-white">
+                        <i class="fas fa-star text-yellow-400 text-2xl mb-2"></i>
+                        <p class="text-sm">"التوصيل كان سريع جداً"</p>
+                        <p class="text-xs text-gray-300 mt-2">- محمد رضا</p>
+                    </div>
+                </div>
             </div>
         </div>
     `;
 
     // ربط الأحداث
-    document.getElementById("firstName").oninput = (e) => { formData.firstName = e.target.value; clearMessage(); };
-    document.getElementById("lastName").oninput = (e) => { formData.lastName = e.target.value; clearMessage(); };
-    document.getElementById("phone").oninput = (e) => { formData.phone = e.target.value; clearMessage(); };
-    document.getElementById("state").onchange = (e) => { formData.state = e.target.value; clearMessage(); };
-    document.getElementById("delivery").onchange = (e) => { formData.delivery = e.target.value; render(); };
-    document.getElementById("btn").onclick = submitOrder;
+    bindEvents();
+    startCountdown();
+}
+
+function bindEvents() {
+    const firstNameInput = document.getElementById("firstName");
+    const lastNameInput = document.getElementById("lastName");
+    const phoneInput = document.getElementById("phone");
+    const stateSelect = document.getElementById("state");
+    const deliverySelect = document.getElementById("delivery");
+    const btn = document.getElementById("btn");
+
+    if(firstNameInput) firstNameInput.oninput = (e) => { formData.firstName = e.target.value; clearMessage(); removeError(e.target); };
+    if(lastNameInput) lastNameInput.oninput = (e) => { formData.lastName = e.target.value; clearMessage(); removeError(e.target); };
+    if(phoneInput) phoneInput.oninput = (e) => { formData.phone = e.target.value; clearMessage(); removeError(e.target); };
+    if(stateSelect) stateSelect.onchange = (e) => { formData.state = e.target.value; clearMessage(); removeError(e.target); };
+    if(deliverySelect) deliverySelect.onchange = (e) => { formData.delivery = e.target.value; render(); };
+    if(btn) btn.onclick = submitOrder;
+}
+
+function removeError(element) {
+    if(element) element.classList.remove("error");
+}
+
+function showError(element) {
+    if(element) element.classList.add("error");
+    setTimeout(() => {
+        if(element) element.classList.remove("error");
+    }, 500);
 }
 
 function escapeHtml(str) {
@@ -157,21 +484,53 @@ function clearMessage() {
     formData.messageType = "";
 }
 
+function showModal() {
+    const modal = document.getElementById("successModal");
+    if(modal) modal.style.display = "flex";
+}
+
+function closeModal() {
+    const modal = document.getElementById("successModal");
+    if(modal) modal.style.display = "none";
+}
+
 // ================= إرسال الطلب =================
 async function submitOrder(){
-    if(!formData.firstName || !formData.lastName || !formData.phone || !formData.state){
-        formData.message = "❌ أكمل جميع البيانات";
+    if(!formData.firstName){
+        formData.message = "❌ الرجاء إدخال الاسم";
         formData.messageType = "error";
         render();
+        showError(document.getElementById("firstName"));
+        return;
+    }
+    if(!formData.lastName){
+        formData.message = "❌ الرجاء إدخال اللقب";
+        formData.messageType = "error";
+        render();
+        showError(document.getElementById("lastName"));
+        return;
+    }
+    if(!formData.phone){
+        formData.message = "❌ الرجاء إدخال رقم الهاتف";
+        formData.messageType = "error";
+        render();
+        showError(document.getElementById("phone"));
+        return;
+    }
+    if(!formData.state){
+        formData.message = "❌ الرجاء اختيار الولاية";
+        formData.messageType = "error";
+        render();
+        showError(document.getElementById("state"));
         return;
     }
 
-    // التحقق من رقم الهاتف (رقم جزائري تقريبي)
     const phoneRegex = /^(05|06|07)[0-9]{8}$/;
     if(!phoneRegex.test(formData.phone)){
-        formData.message = "❌ رقم الهاتف غير صحيح (يجب أن يبدأ بـ 05 أو 06 أو 07 ويتكون من 10 أرقام)";
+        formData.message = "❌ رقم الهاتف غير صحيح (يجب أن يبدأ بـ 05 أو 06 أو 07)";
         formData.messageType = "error";
         render();
+        showError(document.getElementById("phone"));
         return;
     }
 
@@ -206,27 +565,30 @@ async function submitOrder(){
         }
 
         if(data && data.ok === true){
-            formData.message = "✅ تم إرسال الطلب بنجاح! سيتم التواصل معك قريباً";
+            formData.message = "";
             formData.messageType = "success";
-            // مسح البيانات بعد النجاح
             formData.firstName = "";
             formData.lastName = "";
             formData.phone = "";
             formData.state = "";
-            // لا نمسح delivery
+            
+            formData.loading = false;
+            render();
+            showModal();
         } else {
             formData.message = "❌ " + (data?.error || "فشل الإرسال، حاول مرة أخرى");
             formData.messageType = "error";
+            formData.loading = false;
+            render();
             console.error("Server error response:", data);
         }
     } catch(err){
         formData.message = "❌ خطأ في الاتصال بالخادم: " + err.message;
         formData.messageType = "error";
+        formData.loading = false;
+        render();
         console.error("Fetch error:", err);
     }
-
-    formData.loading = false;
-    render();
 }
 
 render();
