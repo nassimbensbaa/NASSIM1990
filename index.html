@@ -6,42 +6,34 @@
     <title>متجر VIP | اطلب الآن</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-
         @keyframes float {
             0%,100% {transform:translateY(0)}
             50% {transform:translateY(-10px)}
         }
-
         .title-float {
             animation: float 3s ease-in-out infinite;
             background: linear-gradient(135deg,#f59e0b,#ef4444);
             -webkit-background-clip:text;
             color:transparent;
         }
-
         .btn-glow {
             transition:.3s;
         }
-
         .btn-glow:hover {
             transform: translateY(-2px);
             box-shadow:0 10px 20px rgba(0,0,0,.2);
         }
-
         input,select {
             border:2px solid #e5e7eb;
             transition:.2s;
         }
-
         input:focus,select:focus {
             border-color:#f59e0b;
+            outline: none;
         }
-
         .loading {
             width:18px;
             height:18px;
@@ -51,21 +43,26 @@
             animation:spin .8s linear infinite;
             display:inline-block;
         }
-
         @keyframes spin {
             to {transform:rotate(360deg)}
         }
-
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        .success-message {
+            color: #10b981;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
     </style>
-
 </head>
-
 <body class="bg-gray-100">
 
 <div id="root"></div>
 
 <script>
-
 // ================= المنتج =================
 const PRODUCT = {
     name: "🔥 ساعة ذكية برو MAX",
@@ -74,8 +71,7 @@ const PRODUCT = {
     image: "images/nassim.png"
 };
 
-const finalPrice =
-    PRODUCT.price * (1 - PRODUCT.discount / 100);
+const finalPrice = PRODUCT.price * (1 - PRODUCT.discount / 100);
 
 // ================= الحالة =================
 let formData = {
@@ -85,7 +81,8 @@ let formData = {
     state: "",
     delivery: "office",
     loading: false,
-    message: ""
+    message: "",
+    messageType: "" // success, error
 };
 
 // ================= سعر التوصيل =================
@@ -95,139 +92,144 @@ function shippingPrice(type){
 
 // ================= عرض الصفحة =================
 function render(){
+    const shipping = shippingPrice(formData.delivery);
+    const total = finalPrice + shipping;
 
-const shipping = shippingPrice(formData.delivery);
-const total = finalPrice + shipping;
+    const messageClass = formData.messageType === "success" ? "text-green-600" : "text-red-600";
 
-document.getElementById("root").innerHTML = `
+    document.getElementById("root").innerHTML = `
+        <div class="max-w-4xl mx-auto p-4">
+            <div class="bg-white rounded-3xl shadow-xl p-6">
+                <h1 class="text-3xl font-bold text-center title-float">
+                    ${PRODUCT.name}
+                </h1>
+                <img src="${PRODUCT.image}" class="w-full rounded-xl mt-4" onerror="this.src='https://via.placeholder.com/400x300?text=Product+Image'">
+                <div class="text-center mt-4">
+                    <span class="text-3xl font-bold">${Math.round(finalPrice)} دج</span>
+                </div>
+                <input id="firstName" placeholder="الاسم" value="${escapeHtml(formData.firstName)}" class="w-full p-3 mt-4 rounded-xl">
+                <input id="lastName" placeholder="اللقب" value="${escapeHtml(formData.lastName)}" class="w-full p-3 mt-2 rounded-xl">
+                <input id="phone" placeholder="رقم الهاتف" value="${escapeHtml(formData.phone)}" class="w-full p-3 mt-2 rounded-xl">
+                <select id="state" class="w-full p-3 mt-2 rounded-xl">
+                    <option value="">اختر الولاية</option>
+                    <option ${formData.state === "الجزائر" ? "selected" : ""}>الجزائر</option>
+                    <option ${formData.state === "وهران" ? "selected" : ""}>وهران</option>
+                    <option ${formData.state === "باتنة" ? "selected" : ""}>باتنة</option>
+                    <option ${formData.state === "سطيف" ? "selected" : ""}>سطيف</option>
+                    <option ${formData.state === "قسنطينة" ? "selected" : ""}>قسنطينة</option>
+                </select>
+                <select id="delivery" class="w-full p-3 mt-2 rounded-xl">
+                    <option value="office" ${formData.delivery === "office" ? "selected" : ""}>توصيل للمكتب (${Math.round(shippingPrice("office"))} دج)</option>
+                    <option value="home" ${formData.delivery === "home" ? "selected" : ""}>توصيل للمنزل (${Math.round(shippingPrice("home"))} دج)</option>
+                </select>
+                <div class="bg-gray-800 text-white p-4 mt-4 rounded-xl text-center">
+                    💰 المجموع: ${Math.round(total)} دج
+                </div>
+                <button id="btn" class="w-full mt-4 bg-green-600 text-white p-3 rounded-xl btn-glow font-bold text-lg">
+                    ${formData.loading ? `<span class="loading"></span> جاري الإرسال...` : "تأكيد الطلب"}
+                </button>
+                <p class="text-center mt-3 ${messageClass}">${formData.message}</p>
+            </div>
+        </div>
+    `;
 
-<div class="max-w-4xl mx-auto p-4">
+    // ربط الأحداث
+    document.getElementById("firstName").oninput = (e) => { formData.firstName = e.target.value; clearMessage(); };
+    document.getElementById("lastName").oninput = (e) => { formData.lastName = e.target.value; clearMessage(); };
+    document.getElementById("phone").oninput = (e) => { formData.phone = e.target.value; clearMessage(); };
+    document.getElementById("state").onchange = (e) => { formData.state = e.target.value; clearMessage(); };
+    document.getElementById("delivery").onchange = (e) => { formData.delivery = e.target.value; render(); };
+    document.getElementById("btn").onclick = submitOrder;
+}
 
-<div class="bg-white rounded-3xl shadow-xl p-6">
+function escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === "&") return "&amp;";
+        if (m === "<") return "&lt;";
+        if (m === ">") return "&gt;";
+        return m;
+    });
+}
 
-<h1 class="text-3xl font-bold text-center title-float">
-${PRODUCT.name}
-</h1>
-
-<img src="${PRODUCT.image}" class="w-full rounded-xl mt-4">
-
-<div class="text-center mt-4">
-<span class="text-3xl font-bold">${Math.round(finalPrice)} دج</span>
-</div>
-
-<input id="firstName" placeholder="الاسم" class="w-full p-3 mt-4 rounded-xl">
-<input id="lastName" placeholder="اللقب" class="w-full p-3 mt-2 rounded-xl">
-<input id="phone" placeholder="رقم الهاتف" class="w-full p-3 mt-2 rounded-xl">
-
-<select id="state" class="w-full p-3 mt-2 rounded-xl">
-<option value="">اختر الولاية</option>
-<option>الجزائر</option>
-<option>وهران</option>
-<option>باتنة</option>
-<option>سطيف</option>
-<option>قسنطينة</option>
-</select>
-
-<select id="delivery" class="w-full p-3 mt-2 rounded-xl">
-<option value="office">توصيل للمكتب</option>
-<option value="home">توصيل للمنزل</option>
-</select>
-
-<div class="bg-gray-800 text-white p-4 mt-4 rounded-xl">
-💰 المجموع: ${Math.round(total)} دج
-</div>
-
-<button id="btn"
-class="w-full mt-4 bg-green-600 text-white p-3 rounded-xl btn-glow">
-
-${formData.loading ? `<span class="loading"></span> جاري الإرسال...` : "تأكيد الطلب"}
-
-</button>
-
-<p class="text-center mt-3">${formData.message}</p>
-
-</div>
-
-</div>
-
-`;
-
-// inputs
-document.getElementById("firstName").oninput=e=>formData.firstName=e.target.value;
-document.getElementById("lastName").oninput=e=>formData.lastName=e.target.value;
-document.getElementById("phone").oninput=e=>formData.phone=e.target.value;
-document.getElementById("state").onchange=e=>formData.state=e.target.value;
-document.getElementById("delivery").onchange=e=>formData.delivery=e.target.value;
-
-// submit
-document.getElementById("btn").onclick = submitOrder;
-
+function clearMessage() {
+    formData.message = "";
+    formData.messageType = "";
 }
 
 // ================= إرسال الطلب =================
 async function submitOrder(){
+    if(!formData.firstName || !formData.lastName || !formData.phone || !formData.state){
+        formData.message = "❌ أكمل جميع البيانات";
+        formData.messageType = "error";
+        render();
+        return;
+    }
 
-if(
-!formData.firstName ||
-!formData.lastName ||
-!formData.phone ||
-!formData.state
-){
-formData.message = "❌ أكمل جميع البيانات";
-render();
-return;
+    // التحقق من رقم الهاتف (رقم جزائري تقريبي)
+    const phoneRegex = /^(05|06|07)[0-9]{8}$/;
+    if(!phoneRegex.test(formData.phone)){
+        formData.message = "❌ رقم الهاتف غير صحيح (يجب أن يبدأ بـ 05 أو 06 أو 07 ويتكون من 10 أرقام)";
+        formData.messageType = "error";
+        render();
+        return;
+    }
+
+    formData.loading = true;
+    formData.message = "";
+    render();
+
+    const shipping = shippingPrice(formData.delivery);
+    const total = finalPrice + shipping;
+
+    try {
+        const res = await fetch("/api/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                phone: formData.phone,
+                state: formData.state,
+                deliveryType: formData.delivery,
+                shipping: shipping,
+                total: total,
+                productName: PRODUCT.name
+            })
+        });
+
+        let data;
+        try {
+            data = await res.json();
+        } catch(e) {
+            throw new Error("خطأ في استجابة السيرفر");
+        }
+
+        if(data && data.ok === true){
+            formData.message = "✅ تم إرسال الطلب بنجاح! سيتم التواصل معك قريباً";
+            formData.messageType = "success";
+            // مسح البيانات بعد النجاح
+            formData.firstName = "";
+            formData.lastName = "";
+            formData.phone = "";
+            formData.state = "";
+            // لا نمسح delivery
+        } else {
+            formData.message = "❌ " + (data?.error || "فشل الإرسال، حاول مرة أخرى");
+            formData.messageType = "error";
+            console.error("Server error response:", data);
+        }
+    } catch(err){
+        formData.message = "❌ خطأ في الاتصال بالخادم: " + err.message;
+        formData.messageType = "error";
+        console.error("Fetch error:", err);
+    }
+
+    formData.loading = false;
+    render();
 }
 
-formData.loading = true;
 render();
-
-const shipping = shippingPrice(formData.delivery);
-const total = finalPrice + shipping;
-
-try {
-
-const res = await fetch("/api/send", {
-method: "POST",
-headers: {
-"Content-Type": "application/json"
-},
-body: JSON.stringify({
-firstName: formData.firstName,
-lastName: formData.lastName,
-phone: formData.phone,
-state: formData.state,
-deliveryType: formData.delivery,
-shipping,
-total,
-productName: PRODUCT.name
-})
-});
-
-const data = await res.json();
-
-if(data.ok){
-formData.message = "✅ تم إرسال الطلب بنجاح";
-
-formData.firstName = "";
-formData.lastName = "";
-formData.phone = "";
-formData.state = "";
-
-} else {
-formData.message = "❌ فشل الإرسال";
-}
-
-} catch(err){
-formData.message = "❌ خطأ في السيرفر";
-}
-
-formData.loading = false;
-render();
-
-}
-
-render();
-
 </script>
 
 </body>
