@@ -11,20 +11,26 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
+
         @keyframes float {
             0%,100% {transform:translateY(0)}
             50% {transform:translateY(-10px)}
         }
 
         .title-float {
-            animation: float 3s infinite;
+            animation: float 3s ease-in-out infinite;
             background: linear-gradient(135deg,#f59e0b,#ef4444);
             -webkit-background-clip:text;
             color:transparent;
         }
 
+        .btn-glow {
+            transition:.3s;
+        }
+
         .btn-glow:hover {
             transform: translateY(-2px);
+            box-shadow:0 10px 20px rgba(0,0,0,.2);
         }
 
         input,select {
@@ -37,18 +43,21 @@
         }
 
         .loading {
+            width:18px;
+            height:18px;
             border:3px solid #eee;
             border-top:3px solid #f59e0b;
             border-radius:50%;
-            width:18px;
-            height:18px;
             animation:spin .8s linear infinite;
+            display:inline-block;
         }
 
         @keyframes spin {
             to {transform:rotate(360deg)}
         }
+
     </style>
+
 </head>
 
 <body class="bg-gray-100">
@@ -57,6 +66,7 @@
 
 <script>
 
+// ================= المنتج =================
 const PRODUCT = {
     name: "🔥 ساعة ذكية برو MAX",
     price: 12990,
@@ -67,23 +77,26 @@ const PRODUCT = {
 const finalPrice =
     PRODUCT.price * (1 - PRODUCT.discount / 100);
 
+// ================= الحالة =================
 let formData = {
-    firstName:"",
-    lastName:"",
-    phone:"",
-    state:"",
-    delivery:"office",
-    loading:false,
-    message:""
+    firstName: "",
+    lastName: "",
+    phone: "",
+    state: "",
+    delivery: "office",
+    loading: false,
+    message: ""
 };
 
-function getShipping(type){
+// ================= سعر التوصيل =================
+function shippingPrice(type){
     return type === "home" ? 700 : 400;
 }
 
+// ================= عرض الصفحة =================
 function render(){
 
-const shipping = getShipping(formData.delivery);
+const shipping = shippingPrice(formData.delivery);
 const total = finalPrice + shipping;
 
 document.getElementById("root").innerHTML = `
@@ -92,7 +105,7 @@ document.getElementById("root").innerHTML = `
 
 <div class="bg-white rounded-3xl shadow-xl p-6">
 
-<h1 class="text-3xl font-bold title-float text-center">
+<h1 class="text-3xl font-bold text-center title-float">
 ${PRODUCT.name}
 </h1>
 
@@ -104,28 +117,31 @@ ${PRODUCT.name}
 
 <input id="firstName" placeholder="الاسم" class="w-full p-3 mt-4 rounded-xl">
 <input id="lastName" placeholder="اللقب" class="w-full p-3 mt-2 rounded-xl">
-<input id="phone" placeholder="الهاتف" class="w-full p-3 mt-2 rounded-xl">
+<input id="phone" placeholder="رقم الهاتف" class="w-full p-3 mt-2 rounded-xl">
 
 <select id="state" class="w-full p-3 mt-2 rounded-xl">
-<option value="">الولاية</option>
+<option value="">اختر الولاية</option>
 <option>الجزائر</option>
 <option>وهران</option>
 <option>باتنة</option>
 <option>سطيف</option>
+<option>قسنطينة</option>
 </select>
 
 <select id="delivery" class="w-full p-3 mt-2 rounded-xl">
-<option value="office">مكتب</option>
-<option value="home">منزل</option>
+<option value="office">توصيل للمكتب</option>
+<option value="home">توصيل للمنزل</option>
 </select>
 
 <div class="bg-gray-800 text-white p-4 mt-4 rounded-xl">
-المجموع: ${Math.round(total)} دج
+💰 المجموع: ${Math.round(total)} دج
 </div>
 
 <button id="btn"
 class="w-full mt-4 bg-green-600 text-white p-3 rounded-xl btn-glow">
-${formData.loading ? "جاري الإرسال..." : "تأكيد الطلب"}
+
+${formData.loading ? `<span class="loading"></span> جاري الإرسال...` : "تأكيد الطلب"}
+
 </button>
 
 <p class="text-center mt-3">${formData.message}</p>
@@ -136,63 +152,76 @@ ${formData.loading ? "جاري الإرسال..." : "تأكيد الطلب"}
 
 `;
 
+// inputs
 document.getElementById("firstName").oninput=e=>formData.firstName=e.target.value;
 document.getElementById("lastName").oninput=e=>formData.lastName=e.target.value;
 document.getElementById("phone").oninput=e=>formData.phone=e.target.value;
 document.getElementById("state").onchange=e=>formData.state=e.target.value;
 document.getElementById("delivery").onchange=e=>formData.delivery=e.target.value;
 
-document.getElementById("btn").onclick = submit;
+// submit
+document.getElementById("btn").onclick = submitOrder;
 
 }
 
-async function submit(){
+// ================= إرسال الطلب =================
+async function submitOrder(){
 
-if(!formData.firstName||!formData.lastName||!formData.phone||!formData.state){
-formData.message="❌ أكمل البيانات";
-render();return;
+if(
+!formData.firstName ||
+!formData.lastName ||
+!formData.phone ||
+!formData.state
+){
+formData.message = "❌ أكمل جميع البيانات";
+render();
+return;
 }
 
-formData.loading=true;
+formData.loading = true;
 render();
 
-const shipping = getShipping(formData.delivery);
+const shipping = shippingPrice(formData.delivery);
 const total = finalPrice + shipping;
 
-try{
+try {
 
-const res = await fetch("/api/send",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-firstName:formData.firstName,
-lastName:formData.lastName,
-phone:formData.phone,
-state:formData.state,
-deliveryType:formData.delivery,
+const res = await fetch("/api/send", {
+method: "POST",
+headers: {
+"Content-Type": "application/json"
+},
+body: JSON.stringify({
+firstName: formData.firstName,
+lastName: formData.lastName,
+phone: formData.phone,
+state: formData.state,
+deliveryType: formData.delivery,
 shipping,
 total,
-productName:PRODUCT.name
+productName: PRODUCT.name
 })
 });
 
 const data = await res.json();
 
 if(data.ok){
-formData.message="✅ تم إرسال الطلب";
-formData.firstName="";
-formData.lastName="";
-formData.phone="";
-formData.state="";
-}else{
-formData.message="❌ خطأ في الإرسال";
+formData.message = "✅ تم إرسال الطلب بنجاح";
+
+formData.firstName = "";
+formData.lastName = "";
+formData.phone = "";
+formData.state = "";
+
+} else {
+formData.message = "❌ فشل الإرسال";
 }
 
-}catch(e){
-formData.message="❌ خطأ في السيرفر";
+} catch(err){
+formData.message = "❌ خطأ في السيرفر";
 }
 
-formData.loading=false;
+formData.loading = false;
 render();
 
 }
