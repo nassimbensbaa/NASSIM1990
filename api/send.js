@@ -1,19 +1,23 @@
 export default async function handler(req, res) {
 
   if (req.method !== "POST") {
-
     return res.status(405).json({
       ok: false,
-      message: "Method not allowed"
+      message: "Only POST allowed"
     });
-
   }
 
   try {
 
-    // رابط Google Script من Vercel Environment Variables
     const GOOGLE_SCRIPT_URL =
       process.env.GOOGLE_SCRIPT_URL;
+
+    if (!GOOGLE_SCRIPT_URL) {
+      return res.status(500).json({
+        ok: false,
+        message: "Missing GOOGLE_SCRIPT_URL"
+      });
+    }
 
     const {
       firstName,
@@ -24,46 +28,44 @@ export default async function handler(req, res) {
       shipping,
       total,
       productName
-    } = req.body;
+    } = req.body || {};
 
-    // إرسال البيانات إلى Google Sheet
-    const response = await fetch(
-      GOOGLE_SCRIPT_URL,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
+    const payload = {
+      name: `${firstName || ""} ${lastName || ""}`,
+      phone: phone || "",
+      state: state || "",
+      delivery: deliveryType || "",
+      shipping: shipping || 0,
+      total: total || 0,
+      product: productName || ""
+    };
 
-          name: `${firstName} ${lastName}`,
+    const gsResponse = await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
 
-          phone: phone,
+    const text = await gsResponse.text();
 
-          state: state,
+    let data;
 
-          delivery: deliveryType === "home"
-            ? "منزل"
-            : "مكتب",
-
-          shipping: shipping,
-
-          total: total,
-
-          product: productName
-
-        })
-      }
-    );
-
-    const data = await response.json();
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      data = { raw: text };
+    }
 
     return res.status(200).json({
       ok: true,
-      sheet: data
+      google: data
     });
 
   } catch (error) {
+
+    console.error("SEND ERROR:", error);
 
     return res.status(500).json({
       ok: false,
@@ -71,5 +73,4 @@ export default async function handler(req, res) {
     });
 
   }
-
 }
