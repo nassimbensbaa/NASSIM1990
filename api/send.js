@@ -1,13 +1,35 @@
 export default async function handler(req, res) {
+
   if (req.method !== "POST") {
-    return res.status(405).json({ ok: false, message: "Only POST allowed" });
+    return res.status(405).json({
+      ok: false,
+      message: "Only POST allowed"
+    });
   }
 
   try {
+
     const BOT_TOKEN = process.env.BOT_TOKEN;
     const CHAT_ID = process.env.CHAT_ID;
 
-    const { firstName, lastName, phone, state, deliveryType, shipping, total, productName } = req.body;
+    // رابط Google Sheet
+    const GOOGLE_SCRIPT_URL =
+      "https://script.google.com/macros/s/AKfycbxfYw89K_o26V_7smH7a2VV7IEvkUfd2ROlWZk0eKdM5UU1610Vo8Vs29k8UT494yrg2w/exec";
+
+    const {
+      firstName,
+      lastName,
+      phone,
+      state,
+      deliveryType,
+      shipping,
+      total,
+      productName
+    } = req.body;
+
+    // =========================
+    // رسالة Telegram
+    // =========================
 
     const message = `
 🌟 طلب جديد من المتجر 🌟
@@ -22,22 +44,72 @@ export default async function handler(req, res) {
 ━━━━━━━━━━━━━━
 `;
 
-    const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+    // =========================
+    // إرسال Telegram
+    // =========================
 
-    const telegramRes = await fetch(url, {
+    const telegramUrl =
+      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+
+    const telegramRes = await fetch(telegramUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         chat_id: CHAT_ID,
         text: message
       })
     });
 
-    const data = await telegramRes.json();
+    const telegramData = await telegramRes.json();
 
-    return res.status(200).json(data);
+    // =========================
+    // إرسال Google Sheet
+    // =========================
+
+    let sheetData = null;
+
+    try {
+
+      const sheetRes = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: `${firstName} ${lastName}`,
+          phone: phone,
+          state: state,
+          product: productName
+        })
+      });
+
+      sheetData = await sheetRes.json();
+
+    } catch (sheetError) {
+
+      console.log("Google Sheet Error:", sheetError);
+
+    }
+
+    // =========================
+    // النتيجة
+    // =========================
+
+    return res.status(200).json({
+      ok: true,
+      telegram: telegramData,
+      sheet: sheetData
+    });
 
   } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message });
+
+    return res.status(500).json({
+      ok: false,
+      error: error.message
+    });
+
   }
+
 }
