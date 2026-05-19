@@ -1,10 +1,7 @@
 export default async function handler(req, res) {
 
   if (req.method !== "POST") {
-    return res.status(405).json({
-      ok: false,
-      message: "Only POST allowed"
-    });
+    return res.status(405).json({ ok: false });
   }
 
   try {
@@ -28,19 +25,19 @@ export default async function handler(req, res) {
       shipping,
       total,
       productName
-    } = req.body || {};
+    } = req.body;
 
     const payload = {
-      name: `${firstName || ""} ${lastName || ""}`,
-      phone: phone || "",
-      state: state || "",
-      delivery: deliveryType || "",
-      shipping: shipping || 0,
-      total: total || 0,
-      product: productName || ""
+      name: `${firstName} ${lastName}`,
+      phone,
+      state,
+      delivery: deliveryType,
+      shipping,
+      total,
+      product: productName
     };
 
-    const gsResponse = await fetch(GOOGLE_SCRIPT_URL, {
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -48,24 +45,22 @@ export default async function handler(req, res) {
       body: JSON.stringify(payload)
     });
 
-    const text = await gsResponse.text();
+    const text = await response.text();
 
-    let data;
+    let result;
 
     try {
-      data = JSON.parse(text);
-    } catch (e) {
-      data = { raw: text };
+      result = JSON.parse(text);
+    } catch {
+      result = { raw: text };
     }
 
     return res.status(200).json({
       ok: true,
-      google: data
+      google: result
     });
 
   } catch (error) {
-
-    console.error("SEND ERROR:", error);
 
     return res.status(500).json({
       ok: false,
