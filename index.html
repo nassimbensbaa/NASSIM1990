@@ -11,496 +11,189 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-
         @keyframes float {
-            0%,100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            0%,100% {transform:translateY(0)}
+            50% {transform:translateY(-10px)}
         }
 
         .title-float {
-            animation: float 3s ease-in-out infinite;
+            animation: float 3s infinite;
             background: linear-gradient(135deg,#f59e0b,#ef4444);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .btn-glow {
-            transition: all .3s ease;
+            -webkit-background-clip:text;
+            color:transparent;
         }
 
         .btn-glow:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,.2);
         }
 
         input,select {
-            transition: all .2s ease;
-            border: 2px solid #e5e7eb;
+            border:2px solid #e5e7eb;
+            transition:.2s;
         }
 
-        input:focus,
-        select:focus {
-            border-color: #f59e0b;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(245,158,11,.1);
+        input:focus,select:focus {
+            border-color:#f59e0b;
         }
 
         .loading {
-            display:inline-block;
-            width:20px;
-            height:20px;
-            border:3px solid #f3f3f3;
+            border:3px solid #eee;
             border-top:3px solid #f59e0b;
             border-radius:50%;
-            animation: spin .8s linear infinite;
+            width:18px;
+            height:18px;
+            animation:spin .8s linear infinite;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {transform:rotate(360deg)}
         }
-
     </style>
-
 </head>
 
-<body class="bg-gradient-to-br from-gray-100 to-gray-200">
+<body class="bg-gray-100">
 
-<div id="root"
-     class="max-w-5xl mx-auto p-4 md:p-6"></div>
+<div id="root"></div>
 
 <script>
 
-// المنتج
 const PRODUCT = {
-
     name: "🔥 ساعة ذكية برو MAX",
-
     price: 12990,
-
     discount: 28,
-
     image: "images/nassim.png"
-
 };
 
 const finalPrice =
     PRODUCT.price * (1 - PRODUCT.discount / 100);
 
-// الولايات
-const ALGERIA_STATES = [
-
-    "أدرار","الشلف","الأغواط","أم البواقي",
-    "باتنة","بجاية","بسكرة","بشار",
-    "البليدة","البويرة","تمنراست","تبسة",
-    "تلمسان","تيارت","تيزي وزو",
-    "الجزائر","الجلفة","جيجل","سطيف",
-    "سعيدة","سكيكدة","سيدي بلعباس",
-    "عنابة","قالمة","قسنطينة","المدية",
-    "ميلة","معسكر","مستغانم",
-    "المسيلة","وهران","البيض",
-    "إليزي","برج بوعريريج",
-    "بومرداس","الطارف","تندوف",
-    "تيسمسيلت","الوادي","خنشلة",
-    "سوق أهراس","تيبازة"
-
-];
-
-// أسعار التوصيل
-const OFFICE_PRICE = 400;
-const HOME_PRICE = 700;
-
-function getShippingPrice(type){
-
-    return type === "home"
-        ? HOME_PRICE
-        : OFFICE_PRICE;
-
-}
-
-// حالة التطبيق
 let formData = {
-
-    firstName: "",
-    lastName: "",
-    phone: "",
-    wilaya: "",
-    delivery: "office",
-    loading: false,
-    message: ""
-
+    firstName:"",
+    lastName:"",
+    phone:"",
+    state:"",
+    delivery:"office",
+    loading:false,
+    message:""
 };
 
-// الواجهة
+function getShipping(type){
+    return type === "home" ? 700 : 400;
+}
+
 function render(){
 
-    const shipping =
-        getShippingPrice(formData.delivery);
+const shipping = getShipping(formData.delivery);
+const total = finalPrice + shipping;
 
-    const total =
-        finalPrice + shipping;
+document.getElementById("root").innerHTML = `
 
-    const html = `
+<div class="max-w-4xl mx-auto p-4">
 
-    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+<div class="bg-white rounded-3xl shadow-xl p-6">
 
-        <div class="bg-gradient-to-r from-orange-600 to-purple-700 p-6 text-center text-white">
+<h1 class="text-3xl font-bold title-float text-center">
+${PRODUCT.name}
+</h1>
 
-            <i class="fas fa-crown text-3xl mb-2"></i>
+<img src="${PRODUCT.image}" class="w-full rounded-xl mt-4">
 
-            <h2 class="text-xl font-bold">
-                متجر VIP
-            </h2>
+<div class="text-center mt-4">
+<span class="text-3xl font-bold">${Math.round(finalPrice)} دج</span>
+</div>
 
-            <p class="text-sm opacity-90">
-                عروض حصرية | توصيل سريع
-            </p>
+<input id="firstName" placeholder="الاسم" class="w-full p-3 mt-4 rounded-xl">
+<input id="lastName" placeholder="اللقب" class="w-full p-3 mt-2 rounded-xl">
+<input id="phone" placeholder="الهاتف" class="w-full p-3 mt-2 rounded-xl">
 
-        </div>
+<select id="state" class="w-full p-3 mt-2 rounded-xl">
+<option value="">الولاية</option>
+<option>الجزائر</option>
+<option>وهران</option>
+<option>باتنة</option>
+<option>سطيف</option>
+</select>
 
-        <div class="grid md:grid-cols-2 gap-8 p-6 md:p-8">
+<select id="delivery" class="w-full p-3 mt-2 rounded-xl">
+<option value="office">مكتب</option>
+<option value="home">منزل</option>
+</select>
 
-            <div class="text-center md:text-right space-y-5">
+<div class="bg-gray-800 text-white p-4 mt-4 rounded-xl">
+المجموع: ${Math.round(total)} دج
+</div>
 
-                <h1 class="text-4xl md:text-5xl font-black title-float">
-                    ${PRODUCT.name}
-                </h1>
+<button id="btn"
+class="w-full mt-4 bg-green-600 text-white p-3 rounded-xl btn-glow">
+${formData.loading ? "جاري الإرسال..." : "تأكيد الطلب"}
+</button>
 
-                <div class="relative">
+<p class="text-center mt-3">${formData.message}</p>
 
-                    <img src="${PRODUCT.image}"
-                         class="w-full rounded-2xl shadow-xl">
+</div>
 
-                    <div class="absolute -top-3 -right-3 bg-red-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
+</div>
 
-                        -${PRODUCT.discount}% 🔥
+`;
 
-                    </div>
+document.getElementById("firstName").oninput=e=>formData.firstName=e.target.value;
+document.getElementById("lastName").oninput=e=>formData.lastName=e.target.value;
+document.getElementById("phone").oninput=e=>formData.phone=e.target.value;
+document.getElementById("state").onchange=e=>formData.state=e.target.value;
+document.getElementById("delivery").onchange=e=>formData.delivery=e.target.value;
 
-                </div>
-
-                <div class="bg-gray-50 p-5 rounded-2xl">
-
-                    <span class="text-4xl font-bold text-gray-800">
-
-                        ${Math.round(finalPrice)}
-
-                    </span>
-
-                    <span class="text-xl">
-                        دج
-                    </span>
-
-                    <span class="line-through text-gray-400 mx-3">
-
-                        ${PRODUCT.price} دج
-
-                    </span>
-
-                </div>
-
-            </div>
-
-            <div>
-
-                <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-
-                    <h3 class="text-2xl font-bold mb-5 border-r-4 border-orange-500 pr-3">
-
-                        <i class="fas fa-file-alt text-orange-500 ml-2"></i>
-
-                        بيانات الطلب
-
-                    </h3>
-
-                    <div class="space-y-4">
-
-                        <div class="grid grid-cols-2 gap-3">
-
-                            <input type="text"
-                                   id="firstName"
-                                   placeholder="الاسم"
-                                   value="${formData.firstName}"
-                                   class="w-full p-3 rounded-xl bg-gray-50">
-
-                            <input type="text"
-                                   id="lastName"
-                                   placeholder="اللقب"
-                                   value="${formData.lastName}"
-                                   class="w-full p-3 rounded-xl bg-gray-50">
-
-                        </div>
-
-                        <input type="tel"
-                               id="phone"
-                               placeholder="رقم الهاتف"
-                               value="${formData.phone}"
-                               class="w-full p-3 rounded-xl bg-gray-50">
-
-                        <select id="wilaya"
-                                class="w-full p-3 rounded-xl bg-gray-50">
-
-                            <option value="">
-                                اختر الولاية
-                            </option>
-
-                            ${ALGERIA_STATES.map(w => `
-                                <option value="${w}"
-                                ${formData.wilaya === w ? "selected" : ""}>
-                                    ${w}
-                                </option>
-                            `).join("")}
-
-                        </select>
-
-                        <div class="bg-orange-50 p-4 rounded-xl">
-
-                            <p class="font-bold mb-2">
-                                طريقة التوصيل:
-                            </p>
-
-                            <div class="flex gap-4">
-
-                                <label class="flex items-center gap-2">
-
-                                    <input type="radio"
-                                           name="delivery"
-                                           value="office"
-                                           ${formData.delivery === "office" ? "checked" : ""}>
-
-                                    📦 مكتب
-
-                                </label>
-
-                                <label class="flex items-center gap-2">
-
-                                    <input type="radio"
-                                           name="delivery"
-                                           value="home"
-                                           ${formData.delivery === "home" ? "checked" : ""}>
-
-                                    🏠 منزل
-
-                                </label>
-
-                            </div>
-
-                        </div>
-
-                        <div class="bg-gray-800 text-white p-5 rounded-xl">
-
-                            <div class="flex justify-between mb-2">
-
-                                <span>
-                                    💰 المنتج:
-                                </span>
-
-                                <span>
-                                    ${Math.round(finalPrice)} دج
-                                </span>
-
-                            </div>
-
-                            <div class="flex justify-between mb-2">
-
-                                <span>
-                                    🚚 التوصيل:
-                                </span>
-
-                                <span class="text-orange-400">
-                                    ${shipping} دج
-                                </span>
-
-                            </div>
-
-                            <div class="flex justify-between pt-3 border-t border-gray-600 text-lg font-bold">
-
-                                <span>
-                                    💎 المجموع:
-                                </span>
-
-                                <span class="text-yellow-400">
-                                    ${Math.round(total)} دج
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                        <button id="submitBtn"
-                                class="w-full bg-gradient-to-r from-green-600 to-emerald-700 text-white py-3 rounded-xl font-bold text-lg btn-glow">
-
-                            ${formData.loading
-                                ? '<span class="loading"></span>'
-                                : 'تأكيد الطلب'}
-
-                        </button>
-
-                        ${formData.message ? `
-
-                        <div class="text-center p-3 rounded-xl
-                            ${formData.message.includes('✅')
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-red-100 text-red-700'}">
-
-                            ${formData.message}
-
-                        </div>
-
-                        ` : ''}
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    `;
-
-    document.getElementById("root").innerHTML = html;
-
-    document.getElementById("firstName")
-        ?.addEventListener("input",e=>{
-            formData.firstName = e.target.value;
-        });
-
-    document.getElementById("lastName")
-        ?.addEventListener("input",e=>{
-            formData.lastName = e.target.value;
-        });
-
-    document.getElementById("phone")
-        ?.addEventListener("input",e=>{
-            formData.phone = e.target.value;
-        });
-
-    document.getElementById("wilaya")
-        ?.addEventListener("change",e=>{
-            formData.wilaya = e.target.value;
-        });
-
-    document.querySelectorAll('input[name="delivery"]')
-        .forEach(radio=>{
-
-            radio.addEventListener("change",e=>{
-
-                formData.delivery = e.target.value;
-
-                render();
-
-            });
-
-        });
-
-    document.getElementById("submitBtn")
-        ?.addEventListener("click",submitOrder);
+document.getElementById("btn").onclick = submit;
 
 }
 
-// إرسال الطلب
-async function submitOrder(){
+async function submit(){
 
-    if(!formData.firstName ||
-       !formData.lastName ||
-       !formData.phone ||
-       !formData.wilaya){
+if(!formData.firstName||!formData.lastName||!formData.phone||!formData.state){
+formData.message="❌ أكمل البيانات";
+render();return;
+}
 
-        formData.message =
-            "❌ يرجى ملء جميع الحقول";
+formData.loading=true;
+render();
 
-        render();
+const shipping = getShipping(formData.delivery);
+const total = finalPrice + shipping;
 
-        return;
-    }
+try{
 
-    formData.loading = true;
+const res = await fetch("/api/send",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+firstName:formData.firstName,
+lastName:formData.lastName,
+phone:formData.phone,
+state:formData.state,
+deliveryType:formData.delivery,
+shipping,
+total,
+productName:PRODUCT.name
+})
+});
 
-    render();
+const data = await res.json();
 
-    const shipping =
-        getShippingPrice(formData.delivery);
+if(data.ok){
+formData.message="✅ تم إرسال الطلب";
+formData.firstName="";
+formData.lastName="";
+formData.phone="";
+formData.state="";
+}else{
+formData.message="❌ خطأ في الإرسال";
+}
 
-    const total =
-        finalPrice + shipping;
+}catch(e){
+formData.message="❌ خطأ في السيرفر";
+}
 
-    try {
-
-        const response =
-            await fetch("/api/send",{
-
-                method:"POST",
-
-                headers:{
-                    "Content-Type":"application/json"
-                },
-
-                body:JSON.stringify({
-
-                    firstName:
-                        formData.firstName,
-
-                    lastName:
-                        formData.lastName,
-
-                    phone:
-                        formData.phone,
-
-                    state:
-                        formData.wilaya,
-
-                    deliveryType:
-                        formData.delivery,
-
-                    shipping:
-                        shipping,
-
-                    total:
-                        total,
-
-                    productName:
-                        PRODUCT.name
-
-                })
-
-            });
-
-        const result =
-            await response.json();
-
-        if(result.ok){
-
-            formData.message =
-                `✅ تم استلام الطلب بنجاح`;
-
-            formData.firstName = "";
-            formData.lastName = "";
-            formData.phone = "";
-            formData.wilaya = "";
-            formData.delivery = "office";
-
-        } else {
-
-            formData.message =
-                "❌ حدث خطأ أثناء الإرسال";
-
-        }
-
-    } catch(error){
-
-        console.log(error);
-
-        formData.message =
-            "❌ فشل الاتصال بالخادم";
-
-    }
-
-    formData.loading = false;
-
-    render();
+formData.loading=false;
+render();
 
 }
 
