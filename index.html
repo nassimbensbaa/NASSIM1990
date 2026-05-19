@@ -1,187 +1,201 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر VIP | اطلب الآن</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .title-float {
-            animation: float 3s ease-in-out infinite;
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .btn-glow { transition: all 0.3s ease; }
-        .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); }
-        input, select { transition: all 0.2s ease; border: 2px solid #e5e7eb; }
-        input:focus, select:focus { border-color: #f59e0b; outline: none; box-shadow: 0 0 0 3px rgba(245,158,11,0.1); }
-        .loading { display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #f59e0b; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
-</head>
-<body class="bg-gradient-to-br from-gray-100 to-gray-200">
 
-<div id="root" class="max-w-5xl mx-auto p-4 md:p-6"></div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>متجر VIP</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f3f4f6;
+    }
+
+    .card {
+      max-width: 500px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      margin-bottom: 15px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: #16a34a;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #15803d;
+    }
+
+    .priceBox {
+      background: #111827;
+      color: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <h1 class="text-3xl font-bold text-center mb-5">
+    🔥 ساعة ذكية برو MAX
+  </h1>
+
+  <img
+    src="images/nassim.png"
+    class="rounded-xl mb-5 w-full"
+  >
+
+  <div class="priceBox">
+    <p>💰 السعر: <b>12990 دج</b></p>
+  </div>
+
+  <input type="text" id="firstName" placeholder="الاسم">
+
+  <input type="text" id="lastName" placeholder="اللقب">
+
+  <input type="tel" id="phone" placeholder="رقم الهاتف">
+
+  <select id="state">
+    <option value="">اختر الولاية</option>
+    <option>الجزائر</option>
+    <option>وهران</option>
+    <option>باتنة</option>
+    <option>سطيف</option>
+    <option>البليدة</option>
+  </select>
+
+  <select id="deliveryType">
+    <option value="office">📦 مكتب</option>
+    <option value="home">🏠 منزل</option>
+  </select>
+
+  <button onclick="submitOrder()">
+    تأكيد الطلب
+  </button>
+
+  <div id="message" class="text-center mt-4 font-bold"></div>
+
+</div>
 
 <script>
-// ========== بيانات المنتج ==========
-const PRODUCT = {
-    name: "🔥 ساعة ذكية برو MAX",
-    price: 12990,
-    discount: 28,
-    image: "images/nassim.png"
-};
 
-const finalPrice = PRODUCT.price * (1 - PRODUCT.discount / 100);
+async function submitOrder() {
 
-// ========== ولايات الجزائر ==========
-const ALGERIA_STATES = ["الجزائر","وهران","قسنطينة","بجاية","البليدة","عنابة","سطيف","باتنة"];
+  const firstName =
+    document.getElementById("firstName").value;
 
-// ========== حساب التوصيل ==========
-function getShippingPrice(state, deliveryType) {
-    if (!state) return 0;
-    let base = 400;
-    if (deliveryType === "home") base += 200;
-    return base;
-}
+  const lastName =
+    document.getElementById("lastName").value;
 
-// ========== إرسال إلى Vercel API ==========
-async function sendToTelegram(orderData) {
-    try {
-        const response = await fetch("/api/order", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(orderData)
-        });
+  const phone =
+    document.getElementById("phone").value;
 
-        const result = await response.json();
-        console.log(result);
+  const state =
+    document.getElementById("state").value;
 
-        return result.ok === true;
-    } catch (err) {
-        console.error(err);
-        return false;
-    }
-}
+  const deliveryType =
+    document.getElementById("deliveryType").value;
 
-// ========== الحالة ==========
-let formData = {
-    firstName: "",
-    lastName: "",
-    phone: "",
-    wilaya: "",
-    delivery: "office",
-    loading: false,
-    message: ""
-};
+  if (!firstName || !lastName || !phone || !state) {
 
-// ========== الواجهة ==========
-function render() {
-    const shipping = getShippingPrice(formData.wilaya, formData.delivery);
-    const total = finalPrice + shipping;
+    document.getElementById("message").innerHTML =
+      "❌ يرجى ملء جميع الحقول";
 
-    document.getElementById("root").innerHTML = `
-        <div class="bg-white rounded-3xl shadow-2xl p-6">
+    return;
+  }
 
-            <h1 class="text-3xl font-bold text-center title-float mb-6">
-                ${PRODUCT.name}
-            </h1>
+  const shipping =
+    deliveryType === "home" ? 700 : 400;
 
-            <div class="grid md:grid-cols-2 gap-6">
+  const total =
+    12990 + shipping;
 
-                <div>
-                    <img src="${PRODUCT.image}" class="rounded-2xl shadow">
-                    <p class="text-center mt-3 font-bold text-xl">${Math.round(finalPrice)} دج</p>
-                </div>
+  document.getElementById("message").innerHTML =
+    "⏳ جاري إرسال الطلب...";
 
-                <div class="space-y-3">
+  try {
 
-                    <input id="firstName" placeholder="الاسم" class="w-full p-3 rounded-xl bg-gray-50">
-                    <input id="lastName" placeholder="اللقب" class="w-full p-3 rounded-xl bg-gray-50">
-                    <input id="phone" placeholder="رقم الهاتف" class="w-full p-3 rounded-xl bg-gray-50">
+    const response = await fetch("/api/send", {
 
-                    <select id="wilaya" class="w-full p-3 rounded-xl bg-gray-50">
-                        <option value="">اختر الولاية</option>
-                        ${ALGERIA_STATES.map(w => `<option value="${w}">${w}</option>`).join("")}
-                    </select>
+      method: "POST",
 
-                    <select id="delivery" class="w-full p-3 rounded-xl bg-gray-50">
-                        <option value="office">مكتب</option>
-                        <option value="home">منزل</option>
-                    </select>
+      headers: {
+        "Content-Type": "application/json"
+      },
 
-                    <div class="bg-gray-800 text-white p-4 rounded-xl">
-                        <p>التوصيل: ${shipping} دج</p>
-                        <p>المجموع: ${Math.round(total)} دج</p>
-                    </div>
+      body: JSON.stringify({
 
-                    <button id="btn" class="w-full bg-green-600 text-white p-3 rounded-xl btn-glow">
-                        تأكيد الطلب
-                    </button>
-
-                    ${formData.message ? `<p class="text-center mt-2">${formData.message}</p>` : ""}
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.getElementById("firstName").oninput = e => formData.firstName = e.target.value;
-    document.getElementById("lastName").oninput = e => formData.lastName = e.target.value;
-    document.getElementById("phone").oninput = e => formData.phone = e.target.value;
-    document.getElementById("wilaya").onchange = e => { formData.wilaya = e.target.value; render(); };
-    document.getElementById("delivery").onchange = e => { formData.delivery = e.target.value; render(); };
-
-    document.getElementById("btn").onclick = submit;
-}
-
-// ========== إرسال الطلب ==========
-async function submit() {
-    if (!formData.firstName || !formData.phone || !formData.wilaya) {
-        formData.message = "❌ أكمل البيانات";
-        render();
-        return;
-    }
-
-    formData.loading = true;
-    render();
-
-    const shipping = getShippingPrice(formData.wilaya, formData.delivery);
-    const total = finalPrice + shipping;
-
-    const ok = await sendToTelegram({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phone: formData.phone,
-        state: formData.wilaya,
-        deliveryType: formData.delivery,
+        firstName,
+        lastName,
+        phone,
+        state,
+        deliveryType,
         shipping,
         total,
-        productName: PRODUCT.name
+        productName: "ساعة ذكية برو MAX"
+
+      })
+
     });
 
-    formData.loading = false;
+    const result = await response.json();
 
-    if (ok) {
-        formData.message = "✅ تم إرسال الطلب";
-        formData.firstName = "";
-        formData.lastName = "";
-        formData.phone = "";
-        formData.wilaya = "";
+    if (result.ok) {
+
+      document.getElementById("message").innerHTML =
+        "✅ تم إرسال الطلب بنجاح";
+
+      document.getElementById("firstName").value = "";
+      document.getElementById("lastName").value = "";
+      document.getElementById("phone").value = "";
+      document.getElementById("state").value = "";
+
     } else {
-        formData.message = "❌ فشل الإرسال";
+
+      document.getElementById("message").innerHTML =
+        "❌ حدث خطأ";
+
     }
 
-    render();
+  } catch (error) {
+
+    document.getElementById("message").innerHTML =
+      "❌ فشل الاتصال بالسيرفر";
+
+    console.log(error);
+
+  }
+
 }
 
-render();
 </script>
 
 </body>
