@@ -1,33 +1,34 @@
 export default async function handler(req, res) {
 
   if (req.method !== "POST") {
-    return res.status(405).json({ ok: false, message: "Only POST" });
+    return res.status(405).json({ ok: false });
   }
 
   try {
 
-    const url = process.env.GOOGLE_SCRIPT_URL;
+    const URL = process.env.GOOGLE_SCRIPT_URL;
 
-    if (!url) {
+    if (!URL) {
       return res.status(500).json({
         ok: false,
-        message: "Missing GOOGLE_SCRIPT_URL"
+        error: "Missing GOOGLE_SCRIPT_URL"
       });
     }
 
     const body = req.body;
 
     const payload = {
-      name: `${body.firstName || ""} ${body.lastName || ""}`.trim(),
-      phone: body.phone || "",
-      state: body.state || "",
-      delivery: body.deliveryType || "",
-      shipping: body.shipping || 0,
-      total: body.total || 0,
-      product: body.productName || ""
+      firstName: body.firstName,
+      lastName: body.lastName,
+      phone: body.phone,
+      state: body.state,
+      delivery: body.deliveryType,
+      shipping: body.shipping,
+      total: body.total,
+      product: body.productName
     };
 
-    const response = await fetch(url, {
+    const r = await fetch(URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -35,17 +36,19 @@ export default async function handler(req, res) {
       body: JSON.stringify(payload)
     });
 
-    const text = await response.text();
+    const text = await r.text();
 
     return res.status(200).json({
       ok: true,
       response: text
     });
 
-  } catch (error) {
+  } catch (err) {
+
     return res.status(500).json({
       ok: false,
-      error: error.message
+      error: err.message
     });
+
   }
 }
