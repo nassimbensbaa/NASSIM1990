@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متجر VIP | ساعة ذكية برو MAX</title>
 
-    <!-- Fonts & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,7 +19,6 @@
             min-height: 100vh;
         }
 
-        /* Animations */
         @keyframes float {
             0%,100% { transform: translateY(0px); }
             50% { transform: translateY(-15px); }
@@ -65,7 +63,6 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            animation: float 3s ease-in-out infinite, shimmer 3s ease infinite;
         }
 
         .btn-glow {
@@ -126,10 +123,6 @@
 
         .card-animate {
             animation: fadeInUp 0.6s ease-out;
-        }
-
-        .price-tag {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .discount-badge {
@@ -193,10 +186,10 @@
         @keyframes shake {
             0%,100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
         }
 
-        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 10px;
         }
@@ -209,6 +202,31 @@
         ::-webkit-scrollbar-thumb {
             background: linear-gradient(135deg, #f59e0b, #ef4444);
             border-radius: 10px;
+        }
+
+        /* رفع الصورة */
+        .image-preview {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .upload-overlay {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            text-align: center;
+            padding: 5px;
+            border-radius: 10px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .image-preview:hover .upload-overlay {
+            opacity: 1;
         }
     </style>
 </head>
@@ -225,12 +243,25 @@
 </div>
 
 <script>
+// ================= إعدادات الصور (عدل هنا) =================
+const IMAGES = {
+    // ضع مسار صورك الخاصة هنا
+    productMain: "/images/product-main.jpg",     // الصورة الرئيسية للمنتج
+    productHover: "/images/product-hover.jpg",   // صورة عند تمرير الماوس (اختياري)
+    logo: "/images/logo.png",                     // شعار المتجر (اختياري)
+    bgPattern: "/images/bg-pattern.png",          // خلفية (اختياري)
+    
+    // صور افتراضية في حال عدم وجود الصور
+    fallback: "https://via.placeholder.com/500x500?text=Product+Image"
+};
+
 // ================= المنتج =================
 const PRODUCT = {
     name: "⌚ ساعة ذكية برو MAX",
     price: 12990,
     discount: 28,
-    image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&h=500&fit=crop",
+    image: IMAGES.productMain,
+    hoverImage: IMAGES.productHover,
     features: [
         { icon: "fas fa-heartbeat", text: "قياس معدل ضربات القلب" },
         { icon: "fas fa-chart-line", text: "تتبع النشاط الرياضي" },
@@ -241,6 +272,7 @@ const PRODUCT = {
 
 const finalPrice = PRODUCT.price * (1 - PRODUCT.discount / 100);
 let countdownTimer;
+let currentImage = PRODUCT.image;
 
 // ================= الحالة =================
 let formData = {
@@ -261,7 +293,7 @@ function shippingPrice(type){
 
 // ================= عداد التوقيت =================
 function startCountdown() {
-    let timeLeft = 3600; // 60 دقيقة
+    let timeLeft = 3600;
     const timerElement = document.getElementById("timer");
     if (!timerElement) return;
 
@@ -300,6 +332,22 @@ function startCountdown() {
     }, 1000);
 }
 
+// ================= تغيير الصورة بالتمرير =================
+function setupImageHover() {
+    const imgElement = document.getElementById("productImage");
+    if(!imgElement) return;
+    
+    imgElement.addEventListener("mouseenter", () => {
+        if(PRODUCT.hoverImage && PRODUCT.hoverImage !== PRODUCT.image) {
+            imgElement.src = PRODUCT.hoverImage;
+        }
+    });
+    
+    imgElement.addEventListener("mouseleave", () => {
+        imgElement.src = PRODUCT.image;
+    });
+}
+
 // ================= عرض الصفحة =================
 function render(){
     const shipping = shippingPrice(formData.delivery);
@@ -308,9 +356,18 @@ function render(){
 
     const messageClass = formData.messageType === "success" ? "text-green-600" : "text-red-600";
 
+    // شعار المتجر
+    const logoHtml = IMAGES.logo ? `
+        <div class="text-center mb-4">
+            <img src="${IMAGES.logo}" class="h-12 mx-auto" onerror="this.style.display='none'">
+        </div>
+    ` : '';
+
     document.getElementById("root").innerHTML = `
         <div class="max-w-5xl mx-auto p-4 py-8">
             <div class="card-animate">
+                ${logoHtml}
+                
                 <!-- شريط المبيعات -->
                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 mb-6 text-center text-white">
                     <i class="fas fa-fire text-orange-500"></i>
@@ -324,8 +381,8 @@ function render(){
                             <div class="discount-badge absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold z-10">
                                 -${PRODUCT.discount}% خصم
                             </div>
-                            <img src="${PRODUCT.image}" class="w-full rounded-2xl transition-transform duration-500 group-hover:scale-105" 
-                                 onerror="this.src='https://via.placeholder.com/500x500?text=Smart+Watch'">
+                            <img id="productImage" src="${PRODUCT.image}" class="w-full rounded-2xl transition-transform duration-500 group-hover:scale-105" 
+                                 onerror="this.src='${IMAGES.fallback}'">
                         </div>
                         
                         <!-- الميزات -->
@@ -437,9 +494,9 @@ function render(){
         </div>
     `;
 
-    // ربط الأحداث
     bindEvents();
     startCountdown();
+    setupImageHover();
 }
 
 function bindEvents() {
